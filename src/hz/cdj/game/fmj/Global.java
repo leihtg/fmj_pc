@@ -9,7 +9,7 @@ public class Global {
 	public static int COLOR_BLACK = new Color(0, 0, 0, 255).getRGB();//Color.argb(255, 0, 0, 0);
 	public static int COLOR_TRANSP = new Color(0, 0, 0, 0).getRGB();//Color.argb(0, 0, 0, 0);
 
-	public static final int Scale=3;//游戏放大缩小倍数
+	public static final int Scale=5;//游戏放大缩小倍数
 	public static final int SCREEN_WIDTH = 160;
 	public static final int SCREEN_HEIGHT = 106;
 	
