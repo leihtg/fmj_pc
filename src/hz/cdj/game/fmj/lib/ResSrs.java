@@ -61,9 +61,9 @@ public class ResSrs extends ResBase {
 	
 	private class Key {
 		int index;
-		int show;
-		int nshow;
-		
+		int show; //该桢的图片在屏幕上显示多少个时间周期
+		int nshow;//该桢显示多少个时间周期后，该桢的下一桢开始显示。
+
 		public Key(int index) {
 			this.index = index;
 			this.show = mFrameHeader[index][2];
