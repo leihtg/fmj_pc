@@ -17,13 +17,13 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 	private static final int STATE_PRE = 1; // 起手动画
 	private static final int STATE_ANI = 2; // 魔法动画
 	private static final int STATE_AFT = 3; // 伤害动画
-	
+
 	private int mState = 1;
-	
+
 	private ResSrs mAni;
-	
+
 	private int mAniX, mAniY;
-	
+
 	private int ox, oy;
 
 	GoodsHiddenWeapon hiddenWeapon;
@@ -39,12 +39,16 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 		ox = mAttacker.getCombatX();
 		oy = mAttacker.getCombatY();
 		mAni = hiddenWeapon.getAni();
-		mAni.startAni();
-		mAni.setIteratorNum(2);
+		if (mAni != null) {
+			mAni.startAni();
+			mAni.setIteratorNum(2);
+		}
+		int affectHp = hiddenWeapon.getAffectHp();
+		mTarget.setHP(mTarget.getHP() - affectHp);
 		// TODO effect it
 		mAniX = mTarget.getCombatX();
 		mAniY = mTarget.getCombatY();
-		mRaiseAni = new RaiseAnimation(mAniX, mTarget.getCombatTop(), 10, 0);
+		mRaiseAni = new RaiseAnimation(mAniX, mTarget.getCombatTop(), -affectHp, 0);
 	}
 
 	@Override
@@ -65,7 +69,7 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 			break;
 
 		case STATE_ANI:
-			if (!mAni.update(delta)) {
+			if (mAni == null || !mAni.update(delta)) {
 				mState = STATE_AFT;
 				if (mAttacker instanceof Player) {
 					((Player)mAttacker).setFrameByState();
@@ -96,7 +100,7 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 
 	@Override
 	public void draw(Canvas canvas) {
-		if (mState == STATE_ANI) {
+		if (mState == STATE_ANI && mAni != null) {
 			mAni.drawAbsolutely(canvas, mAniX, mAniY);
 		} else if (mState == STATE_AFT) {
 			mRaiseAni.draw(canvas);
