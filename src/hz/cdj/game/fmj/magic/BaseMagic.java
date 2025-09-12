@@ -6,7 +6,7 @@ import hz.cdj.game.fmj.lib.ResBase;
 import hz.cdj.game.fmj.lib.ResSrs;
 
 public abstract class BaseMagic extends ResBase {
-	
+
 	protected abstract void setOtherData(byte[] buf, int offset);
 
 	@Override
@@ -26,7 +26,7 @@ public abstract class BaseMagic extends ResBase {
 	}
 
 	private int mRound; // 持续回合
-	
+
 	/**
 	 * 获取魔法的持续回合
 	 * @return
@@ -34,9 +34,9 @@ public abstract class BaseMagic extends ResBase {
 	public int getRoundNum() {
 		return mRound;
 	}
-	
+
 	private boolean mIsForAll; // 是否影响全体
-	
+
 	/**
 	 * 魔方是否影响全体
 	 * @return
@@ -44,9 +44,9 @@ public abstract class BaseMagic extends ResBase {
 	public boolean isForAll() {
 		return mIsForAll;
 	}
-	
+
 	private int mCostMp; // 耗费真气
-	
+
 	/**
 	 * 魔方耗费真气
 	 * @return
@@ -54,9 +54,9 @@ public abstract class BaseMagic extends ResBase {
 	public int getCostMp() {
 		return mCostMp;
 	}
-	
+
 	private ResSrs mMagicAni; // 魔法动画
-	
+
 	/**
 	 * 战斗中使用魔法时播放的动画
 	 * @return
@@ -64,21 +64,31 @@ public abstract class BaseMagic extends ResBase {
 	public ResSrs getMagicAni() {
 		return mMagicAni;
 	}
-	
+
 	private String mMagicName; // 魔法名
-	
+
 	public String getMagicName() {
 		return mMagicName;
 	}
-	
+
 	private String mMagicDescription;  // 魔方描述
-	
+
 	public String getMagicDescription() {
 		return mMagicDescription;
 	}
-	
+
 	public void use(FightingCharacter src, FightingCharacter dst) {
-		
+
 	}
-	
+
+	/** 魔法产生的生命值 */
+	public int getHp() {
+		return 0;
+	}
+
+	/** 魔法产生的免疫 */
+	public int getBuff() {
+		return 0;
+	}
+
 }

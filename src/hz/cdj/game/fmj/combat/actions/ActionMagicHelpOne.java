@@ -7,21 +7,22 @@ import hz.cdj.game.fmj.graphics.TextRender;
 import hz.cdj.game.fmj.lib.ResSrs;
 import hz.cdj.game.fmj.magic.BaseMagic;
 import android.graphics.Canvas;
+import hz.cdj.game.fmj.magic.MagicRestore;
 
 public class ActionMagicHelpOne extends ActionSingleTarget {
 
 	private static final int STATE_PRE = 1; // 起手动画
 	private static final int STATE_ANI = 2; // 魔法动画
 	private static final int STATE_AFT = 3; // 伤害动画
-	
+
 	private int mState = 1;
-	
+
 	BaseMagic magic;
-	
+
 	ResSrs mAni;
-	
+
 	int mAnix, mAniy;
-	
+
 	int ox, oy;
 
 	public ActionMagicHelpOne(FightingCharacter attacker,
@@ -38,7 +39,10 @@ public class ActionMagicHelpOne extends ActionSingleTarget {
 		mAni.setIteratorNum(2);
 		mAnix = mTarget.getCombatX();
 		mAniy = mTarget.getCombatY();
-		mRaiseAni = new RaiseAnimation(mTarget.getCombatX(), mTarget.getCombatTop(), 10, 0);
+
+		magic.use(mAttacker, mTarget);
+
+		mRaiseAni = new RaiseAnimation(mTarget.getCombatX(), mTarget.getCombatTop(), magic.getHp(), magic.getBuff());
 	}
 
 	@Override
@@ -69,7 +73,7 @@ public class ActionMagicHelpOne extends ActionSingleTarget {
 				}
 			}
 			break;
-			
+
 		case STATE_AFT:
 			return mRaiseAni.update(delta);
 //			break;
