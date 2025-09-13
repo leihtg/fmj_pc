@@ -6,6 +6,7 @@ import hz.cdj.game.fmj.characters.Monster;
 import hz.cdj.game.fmj.characters.Player;
 import hz.cdj.game.fmj.combat.anim.RaiseAnimation;
 
+import java.util.Iterator;
 import java.util.List;
 
 import android.graphics.Canvas;
@@ -15,9 +16,9 @@ public class ActionPhysicalAttackAll extends ActionMultiTarget {
 	private int TOTAL_FRAME = 5;
 	private float dx, dy;
 	private int ox, oy;
-	
+
 	private int buffRound;
-	
+
 	public ActionPhysicalAttackAll(FightingCharacter attacker,
 			List<? extends FightingCharacter> targets) {
 		super(attacker, targets);
@@ -33,6 +34,9 @@ public class ActionPhysicalAttackAll extends ActionMultiTarget {
 		dy = (14.0f - mAttacker.getCombatY()) / TOTAL_FRAME;
 		for (int i = 0; i < mTargets.size(); i++) {
 			FightingCharacter fc =  mTargets.get(i);
+			if (!fc.isAlive()) {
+				continue;
+			}
 			damage = mAttacker.getAttack() - fc.getDefend();
 			if (damage <= 0) {
 				damage = 1;

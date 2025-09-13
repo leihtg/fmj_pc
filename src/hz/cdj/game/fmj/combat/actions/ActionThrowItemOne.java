@@ -1,16 +1,13 @@
 package hz.cdj.game.fmj.combat.actions;
 
+import android.graphics.Canvas;
 import hz.cdj.game.fmj.characters.FightingCharacter;
 import hz.cdj.game.fmj.characters.Player;
 import hz.cdj.game.fmj.combat.anim.RaiseAnimation;
+import hz.cdj.game.fmj.goods.BaseGoods;
 import hz.cdj.game.fmj.goods.GoodsHiddenWeapon;
-import hz.cdj.game.fmj.graphics.TextRender;
+import hz.cdj.game.fmj.goods.GoodsWeapon;
 import hz.cdj.game.fmj.lib.ResSrs;
-import hz.cdj.game.fmj.magic.BaseMagic;
-
-import java.util.List;
-
-import android.graphics.Canvas;
 
 public class ActionThrowItemOne extends ActionSingleTarget {
 
@@ -28,9 +25,23 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 
 	GoodsHiddenWeapon hiddenWeapon;
 
-	public ActionThrowItemOne(FightingCharacter attacker, FightingCharacter target, GoodsHiddenWeapon g) {
+	/** 伤害生命值 */
+	int affectHp;
+
+	public ActionThrowItemOne(FightingCharacter attacker, FightingCharacter target, BaseGoods g) {
 		super(attacker, target);
-		hiddenWeapon = g;
+		if (g instanceof GoodsHiddenWeapon) {
+			hiddenWeapon = (GoodsHiddenWeapon) g;
+			affectHp = hiddenWeapon.getAffectHp();
+			mAni = hiddenWeapon.getAni();
+			if (mAni != null) {
+				mAni.startAni();
+				mAni.setIteratorNum(2);
+			}
+		} else {
+			GoodsWeapon weapon = (GoodsWeapon) g;
+			affectHp = 1034;
+		}
 	}
 
 	@Override
@@ -38,14 +49,10 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 		// TODO 记下伤害值、异常状态 there is null pointer
 		ox = mAttacker.getCombatX();
 		oy = mAttacker.getCombatY();
-		mAni = hiddenWeapon.getAni();
-		if (mAni != null) {
-			mAni.startAni();
-			mAni.setIteratorNum(2);
-		}
-		int affectHp = hiddenWeapon.getAffectHp();
-		mTarget.setHP(mTarget.getHP() - affectHp);
+
 		// TODO effect it
+		mTarget.setHP(mTarget.getHP() - affectHp);
+
 		mAniX = mTarget.getCombatX();
 		mAniY = mTarget.getCombatY();
 		mRaiseAni = new RaiseAnimation(mAniX, mTarget.getCombatTop(), -affectHp, 0);

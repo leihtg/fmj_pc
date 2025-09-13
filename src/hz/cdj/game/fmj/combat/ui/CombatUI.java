@@ -46,60 +46,60 @@ import java.util.List;
 import java.util.Stack;
 
 public class CombatUI extends BaseScreen {
-	
+
 	private static final Point[] sPlayerIndicatorPos = new Point[]{
 		new Point(69, 45), new Point(101, 41), new Point(133, 33)
 	};
-	
+
 	private static final Point[] sMonsterIndicatorPos = new Point[]{
 		new Point(16, 14), new Point(48, 3), new Point(86, 0)
 	};
-	
+
 	public interface CallBack {
 		/**
 		 * 当一个Action被选择后，会调用此方法
 		 * @param action 选择的Action
 		 */
 		void onActionSelected(Action action);
-		
+
 		/**
 		 * 选择围攻时，调用改方法
 		 */
 		void onAutoAttack();
-		
+
 		/**
 		 * 选择逃跑时，调用该方法。对于已经做出决策的角色，其决策不变；之后的角色动作皆为逃跑
 		 */
 		void onFlee();
-		
+
 		/**
 		 * 取消选择当前角色的Action，应该返回选择上一个角色的Action
 		 */
 		void onCancel();
 	}
-	
+
 	private CallBack mCallBack;
-	
+
 	private Stack<BaseScreen> mScreenStack = new Stack<BaseScreen>();
-	
+
 	private List<Player> mPlayerList;
 	private List<Monster> mMonsterList;
 	private int mCurPlayerIndex;
-	
+
 	/** 标记发出的action的玩家角色*/
 	private FrameAnimation mPlayerIndicator;
-	
+
 	/** 标记action作用的玩家角色*/
 	private FrameAnimation mTargetIndicator;
-	
+
 	/** 标记action作用的敌人角色*/
 	private FrameAnimation mMonsterIndicator;
-	
+
 	public CombatUI(CallBack callBack, int curPlayerIndex) {
 		mCallBack = callBack;
 		mCurPlayerIndex = curPlayerIndex;
 		mScreenStack.push(new MainMenu());
-		
+
 		ResImage tmpImg;
 		tmpImg = (ResImage)DatLib.GetRes(DatLib.RES_PIC, 2, 4);
 		mPlayerIndicator = new FrameAnimation(tmpImg, 1, 2);
@@ -137,25 +137,25 @@ public class CombatUI extends BaseScreen {
 			bs.onKeyUp(key);
 		}
 	}
-	
+
 	public void reset() {
 		mScreenStack.clear();
 		mScreenStack.push(new MainMenu());
 	}
-	
+
 	public void setPlayerList(List<Player> list) {
 		mPlayerList = list;
 	}
-	
+
 	public void setMonsterList(List<Monster> list) {
 		mMonsterList = list;
 	}
-	
+
 	/** */
 	public void setCurrentPlayerIndex(int i) {
 		mCurPlayerIndex = i;
 	}
-	
+
 	/** helper for the callback interface*/
 	private void onActionSelected(Action action) {
 		if (mCallBack != null) {
@@ -169,7 +169,7 @@ public class CombatUI extends BaseScreen {
 			mCallBack.onCancel();
 		}
 	}
-	
+
 	public byte[] getGBKBytes(String s) {
 		try {
 			return s.getBytes("GBK");
@@ -184,17 +184,17 @@ public class CombatUI extends BaseScreen {
 			(ResImage)DatLib.GetRes(DatLib.RES_PIC, 1, 2),
 			(ResImage)DatLib.GetRes(DatLib.RES_PIC, 1, 3)
 	};
-	
+
 
 	/** 显示主菜单、角色信息*/
 	private class MainMenu extends BaseScreen {
-		
+
 		/** 1↑、2←、3↓、4→*/
 		private ResImage mMenuIcon = (ResImage)DatLib.GetRes(DatLib.RES_PIC, 2, 1);
-		
+
 		/** 显示角色HP MP的背景图*/
 		private ResImage mPlayerInfoBg = (ResImage)DatLib.GetRes(DatLib.RES_PIC, 2, 2);
-		
+
 		private int mCurIconIndex = 1;
 
 		@Override
@@ -230,14 +230,14 @@ public class CombatUI extends BaseScreen {
 			case Global.KEY_DOWN:
 				mCurIconIndex = 3;
 				break;
-				
+
 			case Global.KEY_RIGHT:
 				if (mPlayerList.size() <= 1) { // 只有一人不能合击
 					break;
 				}
 				mCurIconIndex = 4;
 				break;
-				
+
 			case Global.KEY_UP:
 				mCurIconIndex = 1;
 				break;
@@ -254,11 +254,11 @@ public class CombatUI extends BaseScreen {
 						onActionSelected(new ActionPhysicalAttackAll(mPlayerList.get(mCurPlayerIndex), mMonsterList));
 						break;
 					}
-					
+
 					// 攻击单个敌人
 					CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mMonsterIndicator, sMonsterIndicatorPos,
 							mMonsterList, new OnCharacterSelectedListener() {
-						
+
 						@Override
 						public void onCharacterSelected(FightingCharacter fc) {
 							onActionSelected(new ActionPhysicalAttackOne(mPlayerList.get(mCurPlayerIndex), fc));
@@ -269,7 +269,7 @@ public class CombatUI extends BaseScreen {
 				case 2://魔法技能
 					GameView.getInstance().pushScreen(new ScreenMagic(mPlayerList.get(mCurPlayerIndex).getMagicChain(),
 							new ScreenMagic.OnItemSelectedListener() {
-								
+
 								@Override
 								public void onItemSelected(final BaseMagic magic) {
 									GameView.getInstance().popScreen(); // 弹出魔法选择界面
@@ -280,7 +280,7 @@ public class CombatUI extends BaseScreen {
 										} else { // 选一个敌人
 											CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mMonsterIndicator, sMonsterIndicatorPos,
 													mMonsterList, new OnCharacterSelectedListener() {
-												
+
 												@Override
 												public void onCharacterSelected(FightingCharacter fc) {
 													onActionSelected(new ActionMagicAttackOne(mPlayerList.get(mCurPlayerIndex), fc, magic));
@@ -294,7 +294,7 @@ public class CombatUI extends BaseScreen {
 										} else { // 选一个Player
 											CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mTargetIndicator, sPlayerIndicatorPos,
 													mPlayerList, new OnCharacterSelectedListener() {
-												
+
 												@Override
 												public void onCharacterSelected(FightingCharacter fc) {
 													onActionSelected(new ActionMagicHelpOne(mPlayerList.get(mCurPlayerIndex),
@@ -306,15 +306,15 @@ public class CombatUI extends BaseScreen {
 								}
 							}));
 					break;
-					
+
 				case 3://杂项
 					CombatUI.this.mScreenStack.push(new MenuMisc());
 					break;
-					
+
 				case 4://合击
 					CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mMonsterIndicator, sMonsterIndicatorPos,
 							mMonsterList, new OnCharacterSelectedListener() {
-						
+
 						@Override
 						public void onCharacterSelected(FightingCharacter fc) {
 							onActionSelected(new ActionCoopMagic(mPlayerList, fc));
@@ -326,7 +326,7 @@ public class CombatUI extends BaseScreen {
 				CombatUI.this.onCancel();
 			}
 		}
-		
+
 	}
 
 	/**
@@ -334,29 +334,29 @@ public class CombatUI extends BaseScreen {
 	 */
 	private interface OnCharacterSelectedListener {
 		/**
-		 * 
+		 *
 		 * @param fc 被选择的角色
 		 */
 		void onCharacterSelected(FightingCharacter fc);
 	}
-	
+
 	/** 角色标识，用于标记当前选择的角色*/
 	private class MenuCharacterSelect extends BaseScreen {
-		
+
 		private OnCharacterSelectedListener mOnCharacterSelectedListener;
-		
+
 		private FrameAnimation mIndicator;
-		
+
 		private Point[] mIndicatorPos;
-		
+
 		private List<? extends FightingCharacter> mList;
-		
+
 		private int mCurSel;
-		
+
 		private boolean mIgnoreDead;
-		
+
 		/**
-		 * 
+		 *
 		 * @param indicator 标记符的帧动画
 		 * @param pos 标记符的位置
 		 * @param list 角色链表
@@ -397,14 +397,14 @@ public class CombatUI extends BaseScreen {
 				}
 			}
 		}
-		
+
 		private void selectNextTarget() {
 			do {
 				++mCurSel;
 				mCurSel %= mList.size();
 			} while(mIgnoreDead && !mList.get(mCurSel).isAlive());
 		}
-		
+
 		private void selectPreTarget() {
 			do {
 				--mCurSel;
@@ -432,16 +432,16 @@ public class CombatUI extends BaseScreen {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	/** 围攻、道具、防御、逃跑、状态*/
 	private class MenuMisc extends BaseScreen {
-		
+
 		private Bitmap mBg = Util.getFrameBitmap(2 * 16 + 6, 5 * 16 + 6);
-		
+
 		private byte[] mText = getGBKBytes("围攻道具防御逃跑状态");
-		
+
 		private byte[][] mItemText = new byte[][]{
 				getGBKBytes("围攻"),
 				getGBKBytes("道具"),
@@ -449,9 +449,9 @@ public class CombatUI extends BaseScreen {
 				getGBKBytes("逃跑"),
 				getGBKBytes("状态")
 		};
-		
+
 		private Rect mTextRect = new Rect(9 + 3, 4 + 3, 9 + 4 + 16 * 2, 4 + 3 + 16 * 5);
-		
+
 		private int mCurSelIndex = 0;
 
 		@Override
@@ -507,17 +507,17 @@ public class CombatUI extends BaseScreen {
 				CombatUI.this.mScreenStack.pop();
 			}
 		}
-		
+
 		/** 战斗中，显示玩家异常状态*/
 		private class MenuState extends BaseScreen {
-			
+
 			private ResImage mBg = (ResImage)DatLib.GetRes(DatLib.RES_PIC, 2, 11);
-			
+
 			/**1↑2↓3×4√5回*/
 			private ResImage mMarker = (ResImage)DatLib.GetRes(DatLib.RES_PIC, 2, 12);
-			
+
 			private int mCurPlayer;
-			
+
 			public MenuState() {
 				mCurPlayer = CombatUI.this.mCurPlayerIndex;
 			}
@@ -564,7 +564,7 @@ public class CombatUI extends BaseScreen {
 					++this.mCurPlayer;
 					this.mCurPlayer %= CombatUI.this.mPlayerList.size();
 					break;
-					
+
 				case Global.KEY_LEFT:
 				case Global.KEY_UP:
 				case Global.KEY_PAGEUP:
@@ -581,21 +581,21 @@ public class CombatUI extends BaseScreen {
 					CombatUI.this.mScreenStack.push(new MenuMisc());
 				}
 			}
-			
+
 		}
 	}
-	
+
 	/** 道具子菜单，装备、投掷、使用*/
 	private class MenuGoods extends BaseScreen {
-		
+
 		private Bitmap mBg = Util.getFrameBitmap(16 * 2 + 6, 16 * 3 + 6);
-		
+
 		private byte[] mText = getGBKBytes("装备投掷使用");
-		
+
 		private byte[][] mItemText = new byte[][]{getGBKBytes("装备"), getGBKBytes("投掷"), getGBKBytes("使用")};
-		
+
 		private Rect mTextRect = new Rect(29 + 3, 14 + 3, 29 + 3 + mBg.getWidth(), 14 + 3 + mBg.getHeight());
-		
+
 		private int mSelIndex = 0;
 
 		@Override
@@ -628,18 +628,18 @@ public class CombatUI extends BaseScreen {
 				case 0:// 装备
 					GameView.getInstance().pushScreen(new ScreenGoodsList(Player.sGoodsList.getEquipList(),
 							new ScreenGoodsList.OnItemSelectedListener() {
-								
+
 								@Override
 								public void onItemSelected(BaseGoods goods) {
 									equipSelected(goods);
 								}
 							}, Mode.Use));
 					break;
-					
+
 				case 1:// 投掷
 					GameView.getInstance().pushScreen(new ScreenGoodsList(getThrowableGoodsList(),
 							new ScreenGoodsList.OnItemSelectedListener() {
-								
+
 								@Override
 								public void onItemSelected(final BaseGoods goods) {
 									GameView.getInstance().popScreen(); // pop goods list
@@ -650,23 +650,23 @@ public class CombatUI extends BaseScreen {
 									} else { // 选一个敌人
 										CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mMonsterIndicator, sMonsterIndicatorPos, mMonsterList,
 												new OnCharacterSelectedListener() {
-													
+
 													@Override
 													public void onCharacterSelected(FightingCharacter fc) {
 														// add throw action
 														onActionSelected(new ActionThrowItemOne(mPlayerList.get(mCurPlayerIndex),
-																fc, (GoodsHiddenWeapon)goods));
+																fc, goods));
 													}
 												}, true));
 									}
 								}
 							}, Mode.Use));
 					break;
-					
+
 				case 2:// 使用
 					GameView.getInstance().pushScreen(new ScreenGoodsList(getUseableGoodsList(),
 							new ScreenGoodsList.OnItemSelectedListener() {
-								
+
 								@Override
 								public void onItemSelected(final BaseGoods goods) {
 									GameView.getInstance().popScreen(); // pop goods list
@@ -677,7 +677,7 @@ public class CombatUI extends BaseScreen {
 									} else { // 选一个角色治疗
 										CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mTargetIndicator, sPlayerIndicatorPos, mPlayerList,
 												new OnCharacterSelectedListener() {
-													
+
 													@Override
 													public void onCharacterSelected(FightingCharacter fc) {
 														onActionSelected(new ActionUseItemOne(mPlayerList.get(mCurPlayerIndex),
@@ -693,7 +693,7 @@ public class CombatUI extends BaseScreen {
 				CombatUI.this.mScreenStack.pop();
 			}
 		}
-		
+
 		/** 当前物品链表中，可用物品*/
 		private List<BaseGoods> getUseableGoodsList() {
 			List<BaseGoods> rlt = new LinkedList<BaseGoods>();
@@ -753,7 +753,7 @@ public class CombatUI extends BaseScreen {
 							list.size());
 					int curSel = 0;
 					byte[][] itemsText;
-					
+
 					{
 						itemsText = new byte[list.size()][11];
 						for (int i = 0; i < itemsText.length; i++) {
@@ -768,11 +768,11 @@ public class CombatUI extends BaseScreen {
 							}
 						}
 					}
-					
+
 					@Override
 					public void update(long delta) {
 					}
-					
+
 					@Override
 					public void onKeyUp(int key) {
 						if (key == Global.KEY_ENTER) {
@@ -786,7 +786,7 @@ public class CombatUI extends BaseScreen {
 							GameView.getInstance().popScreen();
 						}
 					}
-					
+
 					@Override
 					public void onKeyDown(int key) {
 						if (key == Global.KEY_DOWN) {
@@ -797,7 +797,7 @@ public class CombatUI extends BaseScreen {
 							curSel = (curSel + itemsText.length) % itemsText.length;
 						}
 					}
-					
+
 					@Override
 					public void draw(Canvas canvas) {
 						canvas.drawBitmap(bg, 50, 14, null);
@@ -813,7 +813,7 @@ public class CombatUI extends BaseScreen {
 				});
 			}
 		} // end of equipSelected
-		
+
 	}
-	
+
 }
