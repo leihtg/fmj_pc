@@ -24,15 +24,15 @@ public class GoodsManage {
 	 * 装备链表
 	 */
 	LinkedList<BaseGoods> mEquipList = new LinkedList<BaseGoods>();
-	
+
 	public List<BaseGoods> getGoodsList() {
 		return mGoodsList;
 	}
-	
+
 	public List<BaseGoods> getEquipList() {
 		return mEquipList;
 	}
-	
+
 	/**
 	 * 获取装备链表中的i号装备
 	 * @param i
@@ -44,7 +44,7 @@ public class GoodsManage {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 返回装备种类数目
 	 * @return
@@ -52,7 +52,7 @@ public class GoodsManage {
 	public int getEquitTypeNum() {
 		return mEquipList.size();
 	}
-	
+
 	/**
 	 * 获取一次性物品链表中i位置的物品
 	 * @param i
@@ -64,7 +64,7 @@ public class GoodsManage {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 返回一次性物品种类数目
 	 * @return
@@ -72,7 +72,7 @@ public class GoodsManage {
 	public int getGoodsTypeNum() {
 		return mGoodsList.size();
 	}
-	
+
 	/**
 	 * 获取链表中type index号物品
 	 * @param type
@@ -87,7 +87,7 @@ public class GoodsManage {
 		}
 		return null;
 	}
-	
+
 	private BaseGoods getGoods(LinkedList<BaseGoods> list, int type, int index) {
 		Iterator<BaseGoods> iter = list.iterator();
 		while (iter.hasNext()) {
@@ -98,7 +98,7 @@ public class GoodsManage {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 得到type index号物品的数量
 	 * @param type
@@ -114,7 +114,7 @@ public class GoodsManage {
 		}
 		return num;
 	}
-	
+
 	private int getGoodsNum(LinkedList<BaseGoods> list, int type, int index) {
 		Iterator<BaseGoods> iter = list.iterator();
 		while (iter.hasNext()) {
@@ -125,9 +125,9 @@ public class GoodsManage {
 		}
 		return 0;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param goods
 	 */
 	public void addGoods(int type, int index, int num) {
@@ -137,7 +137,7 @@ public class GoodsManage {
 			addGoods(mGoodsList, type, index, num);
 		}
 	}
-	
+
 	public void addGoods(int type, int index) {
 		if (type >= 1 && type <= 7) { // 装备
 			addGoods(mEquipList, type, index, 1);
@@ -145,7 +145,7 @@ public class GoodsManage {
 			addGoods(mGoodsList, type, index, 1);
 		}
 	}
-	
+
 	/**
 	 * 将type index号物品添加到list链表中<p>
 	 * 如果有该号物品，则计数加一<p>
@@ -168,7 +168,7 @@ public class GoodsManage {
 		item.setGoodsNum(num);
 		list.add(item);
 	}
-	
+
 	/**
 	 * 物品数量减一，如果数量为0，则删除物品
 	 * @param type
@@ -177,6 +177,10 @@ public class GoodsManage {
 	 */
 	public boolean deleteGoods(int type, int index) {
 		return useGoodsNum(type, index, 1);
+	}
+
+	public boolean deleteGoods(BaseGoods goods) {
+		return deleteGoods(goods.getType(), goods.getIndex());
 	}
 
 	/**
@@ -193,7 +197,7 @@ public class GoodsManage {
 		}
 		return false;
 	}
-	
+
 	private boolean deleteGoods(LinkedList<BaseGoods> list, int type, int index, int num) {
 		Iterator<BaseGoods> iter = list.iterator();
 		while (iter.hasNext()) {
@@ -211,12 +215,12 @@ public class GoodsManage {
 		}
 		return false;
 	}
-	
+
 	public void clear() {
 		mEquipList.clear();
 		mGoodsList.clear();
 	}
-	
+
 	public void read(ObjectInputStream in) throws IOException {
 		clear();
 		int size = in.readInt();
@@ -225,7 +229,7 @@ public class GoodsManage {
 			g.setGoodsNum(in.readInt());
 			mEquipList.add(g);
 		}
-		
+
 		size = in.readInt();
 		for (int i = 0; i < size; i++) {
 			BaseGoods g = (BaseGoods)DatLib.GetRes(DatLib.RES_GRS, in.readInt(), in.readInt());
@@ -233,7 +237,7 @@ public class GoodsManage {
 			mGoodsList.add(g);
 		}
 	}
-	
+
 	public void write(ObjectOutputStream out) throws IOException {
 		int size = mEquipList.size();
 		out.writeInt(size);
@@ -243,7 +247,7 @@ public class GoodsManage {
 			out.writeInt(g.getIndex());
 			out.writeInt(g.getGoodsNum());
 		}
-		
+
 		size = mGoodsList.size();
 		out.writeInt(size);
 		for (int i = 0; i < size; i++) {

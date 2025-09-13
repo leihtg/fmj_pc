@@ -24,6 +24,7 @@ public class Global {
 	public static final int KEY_PAGEDOWN = 6;
 	public static final int KEY_ENTER = 7;
 	public static final int KEY_CANCEL = 8;
+	public static final int KEY_REPLAY = 9;
 
 	public static final long TIME_GAMELOOP = 45;
 

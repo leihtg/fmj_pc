@@ -37,24 +37,24 @@ import java.util.List;
 import java.util.Random;
 
 public class Combat extends BaseScreen implements CombatUI.CallBack {
-	
+
 	private static boolean sIsEnable, sIsFighting;
-	
+
 	private static Combat sInstance, sInstanceBk;
-	
+
 	private static boolean sIsRandomFight;
-	
+
 	public static boolean IsActive() {
 		return sIsEnable && (sInstance != null) && sIsFighting;
 	}
-	
+
 	/**
 	 * 开启随即战斗
 	 */
 	public static void FightEnable() {
 		sIsEnable = true;
 	}
-	
+
 	/**
 	 * 关闭随即战斗
 	 */
@@ -65,7 +65,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			System.gc();
 		}
 	}
-	
+
 	/**
 	 * 初始化并开启随即战斗
 	 * @param monstersType 0-7 可能出现的敌人种类
@@ -77,10 +77,10 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		sIsEnable = true;
 		sIsRandomFight = true;
 		sIsFighting = false;
-		
+
 		sInstance = new Combat();
 		sInstanceBk = null;
-		
+
 		int cnt = 0;
 		for (int i = 0; i < monstersType.length; ++i) {
 			if (monstersType[i] > 0) {
@@ -93,15 +93,15 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				sInstance.mMonsterType[j++] = monstersType[i];
 			}
 		}
-		
+
 		sInstance.mRoundCnt = 0;
 		sInstance.mMaxRound = 0; // 回合数无限制
-		
+
 		sInstance.createBackgroundBitmap(scrb, scrl, scrr);
 	}
-	
+
 	private int mScrb, mScrl, mScrR;
-	
+
 	public static void write(ObjectOutputStream out) throws IOException {
 		out.writeBoolean(IsActive());
 		if (IsActive()) {
@@ -111,7 +111,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			out.writeInt(sInstance.mScrR);
 		}
 	}
-	
+
 	public static void read(ObjectInputStream in) throws Exception {
 		sIsEnable = in.readBoolean();
 		if (sIsEnable) {
@@ -122,7 +122,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			InitFight(monsterType, scrb, scrl, scrr);
 		}
 	}
-	
+
 	/**
 	 * 剧情战斗
 	 * @param roundMax 最多回合数，0为无限
@@ -135,7 +135,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 	 */
 	public static void EnterFight(int roundMax, int[] monstersType, int[] scr, int[] evtRnds, int[] evts, int lossto, int winto) {
 		sIsRandomFight = false;
-		
+
 		sInstanceBk = sInstance; // 保存当前随机战斗的引用
 		sInstance = new Combat();
 
@@ -148,30 +148,30 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				}
 			}
 		}
-		
+
 		sInstance.mMaxRound = roundMax;
 		sInstance.mRoundCnt = 0;
-		
+
 		PrepareForNewCombat();
-		
+
 		sInstance.createBackgroundBitmap(scr[0], scr[1], scr[2]);
-		
+
 		sInstance.mEventRound = evtRnds;
 		sInstance.mEventNum = evts;
-		
+
 		sInstance.mLossAddr = lossto;
 		sInstance.mWinAddr = winto;
 	}
-	
+
 	private static void PrepareForNewCombat() {
 		sIsEnable = true;
 		sIsFighting = true;
 		sInstance.prepareForNewCombat();
 	}
-	
+
 	private static int COMBAT_PROBABILITY = 20;
 	private static Random sRandom = new Random();
-	
+
 	/**
 	 * 进入一个随机战斗
 	 * @return <code>true</code>新战斗 <code>false</code>不开始战斗
@@ -181,16 +181,16 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			sIsFighting = false;
 			return false;
 		}
-		
+
 		// 打乱怪物类型
 		for (int i = sInstance.mMonsterType.length - 1; i > 1; --i) {
 			int r = sRandom.nextInt(i);
-			
+
 			int t = sInstance.mMonsterType[i];
 			sInstance.mMonsterType[i] = sInstance.mMonsterType[r];
 			sInstance.mMonsterType[r] = t;
 		}
-		
+
 		// 随机添加怪物
 		sInstance.mMonsterList.clear();
 		for (int i = sRandom.nextInt(3), j = 0; i >= 0; i--) {
@@ -199,15 +199,15 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				sInstance.mMonsterList.add(m);
 			}
 		}
-		
+
 		sInstance.mRoundCnt = 0;
 		sInstance.mMaxRound = 0; // 回合不限
-		
+
 		PrepareForNewCombat();
-		
+
 		return true;
 	}
-	
+
 	public static void Update(long delta) {
 		sInstance.update(delta);
 	}
@@ -215,15 +215,15 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 	public static void Draw(Canvas canvas) {
 		sInstance.draw(canvas);
 	}
-	
+
 	public static void KeyDown(int key) {
 		sInstance.onKeyDown(key);
 	}
-	
+
 	public static void KeyUp(int key) {
 		sInstance.onKeyUp(key);
 	}
-	
+
 	private enum CombatState {
 		SelectAction, // 玩家操作阶段，制定攻击策略
 		PerformAction, // 执行动作队列，播放攻击动画
@@ -231,68 +231,71 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		Loss, // 战斗失败
 		Exit
 	}
-	
+
 	/** 玩家角色中心坐标*/
 	public static final Point[] sPlayerPos = new Point[]{
 		new Point(64 + 12, 52 + 18), new Point(96 + 12, 48 + 18), new Point(128 + 12, 40 + 18)
 	};
-	
+
 	private CombatState mCombatState = CombatState.SelectAction;
-	
+
 	/** 是否自动攻击，围攻状态*/
 	private boolean mIsAutoAttack = false;
-	
+
 	/** 动作队列，一个回合中，双方的决策*/
 	private LinkedList<Action> mActionQueue = new LinkedList<Action>();
-	
+
+	/** 主角攻击策略 */
+	private static LinkedList<Action> actorAction = new LinkedList<Action>();
+
 	/** 动作队列的执行者*/
 	private ActionExecutor mActionExecutor = new ActionExecutor(mActionQueue, this);
-	
+
 	/** 战斗的UI*/
 	private CombatUI mCombatUI = new CombatUI(this, 0);
-	
+
 	/** 随机战斗中，可能出现的敌人类型*/
 	private int[] mMonsterType;
-	
+
 	/** 参加战斗的怪物队列*/
 	private List<Monster> mMonsterList = new LinkedList<Monster>();;
-	
+
 	/** 参加战斗的玩家角色队列*/
 	private List<Player> mPlayerList;
-	
+
 	/** 当前选择动作的角色在{@link #mPlayerList}中的序号*/
 	private int mCurSelActionPlayerIndex = 0;
-	
+
 	/** 当前回合*/
 	private int mRoundCnt;
-	
+
 	private boolean mHasEventExed;
-	
+
 	/** 最多回合数，0为无限*/
 	private int mMaxRound;
-	
+
 	/** 触发事件的回合，以及对应的事件号*/
 	private int[] mEventRound, mEventNum;
-	
+
 	/** 战斗失败跳转地址，战斗成功跳转地址*/
 	private int mLossAddr, mWinAddr;
-	
+
 	private ResSrs mFlyPeach = (ResSrs)DatLib.GetRes(DatLib.RES_SRS, 1, 249);
-	
+
 	private boolean mIsWin = false;
-	
+
 	/**战斗背景图*/
 	Bitmap mBackground;
-	
+
 	/** 战斗胜利能获得的金钱和经验*/
 	private int mWinMoney, mWinExp;
-	
+
 	private CombatSuccess mCombatSuccess;
-	
+
 	private long mTimeCnt = 0;
-	
+
 	private Combat() {}
-	
+
 	private void createBackgroundBitmap(int scrb, int scrl, int scrr) {
 		mBackground = Bitmap.createBitmap(160, 96, Config.ARGB_8888);
 		Canvas canvas = new Canvas(mBackground);
@@ -303,33 +306,33 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		if (img != null) img.draw(canvas, 1, 0, 96 - img.getHeight()); // 左下角
 		img = (ResImage)DatLib.GetRes(DatLib.RES_PIC, 4, scrr);
 		if (img != null) img.draw(canvas, 1, 160 - img.getWidth(), 0); // 右上角
-		
+
 		mScrb = scrb;
 		mScrl = scrl;
 		mScrR = scrr;
 	}
-	
+
 	private void prepareForNewCombat() {
 		mActionQueue.clear();
-		
+
 		mIsAutoAttack = false;
 		mCombatState = CombatState.SelectAction;
-		
+
 		mCurSelActionPlayerIndex = 0;
 		mPlayerList = ScreenMainGame.sPlayerList;
-		
+
 		mCombatUI.reset();
 		mCombatUI.setCurrentPlayerIndex(0);
 		mCombatUI.setMonsterList(mMonsterList);
 		mCombatUI.setPlayerList(mPlayerList);
-		
+
 		setOriginalPlayerPos();
 		setOriginalMonsterPos();
-		
+
 		mRoundCnt = 0;
-		
+
 		mHasEventExed = false;
-		
+
 		// 检查玩家血量
 		for (Player p : mPlayerList) {
 			if (p.getHP() <= 0) { // 确保血量大于0
@@ -337,12 +340,12 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			}
 			p.setFrameByState();
 		}
-		
+
 		// 怪物血量设置为其最大值
 		for (Monster m : mMonsterList) {
 			m.setHP(m.getMaxHP());
 		}
-		
+
 		// 计算战斗胜利能获得的金钱和经验
 		mWinMoney = 0;
 		mWinExp = 0;
@@ -350,7 +353,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			mWinMoney += m.getMoney();
 			mWinExp += m.getExp();
 		}
-		
+
 		if (!sIsRandomFight && mMonsterList.size() == 1) { // 剧情战斗，只有一个怪时，怪的位置在中间
 			Monster m = mMonsterList.get(0);
 			Monster n = (Monster)DatLib.GetRes(DatLib.RES_ARS, m.getType(), m.getIndex());
@@ -359,7 +362,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			mMonsterList.add(0, n); // 加入一个看不见的怪
 			setOriginalMonsterPos(); // 重置位置
 		}
-		
+
 		mFlyPeach.startAni();
 		mFlyPeach.setIteratorNum(5);
 	}
@@ -377,13 +380,13 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				GameView.getInstance().changeScreen(Global.SCREEN_MENU);
 			}
 		}
-		
+
 		sIsFighting = false;
 		mActionQueue.clear();
 		mActionExecutor.reset();
 		mCombatUI.reset();
 		mIsAutoAttack = false;
-		
+
 		// 恢复一定的血量
 		for (Player p : mPlayerList) {
 			if (p.getHP() <= 0) {
@@ -399,19 +402,19 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			}
 		}
 	}
-	
+
 	private void setOriginalPlayerPos() {
 		for (int i = 0; i < mPlayerList.size(); i++) {
 			mPlayerList.get(i).setCombatPos(sPlayerPos[i].x, sPlayerPos[i].y);
 		}
 	}
-	
+
 	private void setOriginalMonsterPos() {
 		for (int i = 0; i < mMonsterList.size(); i++) {
 			mMonsterList.get(i).setOriginalCombatPos(i);
 		}
 	}
-	
+
 	@Override
 	public void update(long delta) {
 		mTimeCnt += delta;
@@ -432,13 +435,13 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				mCombatUI.update(delta);
 			}
 			break;
-			
+
 		case PerformAction:
 			if (!mActionExecutor.update(delta)) { // 动作执行完毕
 				if (isAllMonsterDead()) { // 怪物全挂
 					mTimeCnt = 0; // 计时器清零
 					mCombatState = CombatState.Win;
-					
+
 					Player.sMoney += mWinMoney; // 获得金钱
 					List<Player> lvuplist = new LinkedList<Player>();
 					for (Player p : mPlayerList) { // 获得经验
@@ -468,7 +471,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 							}
 						}
 					}
-					
+
 					// 最大幸运值
 					int ppt = 10;
 					for (Player p : mPlayerList) {
@@ -482,7 +485,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 					} else if (ppt < 0) {
 						ppt = 10;
 					}
-					
+
 					// 战利品链表
 					GoodsManage gm = new GoodsManage();
 					LinkedList<BaseGoods> gl = new LinkedList<BaseGoods>();
@@ -513,7 +516,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				}
 			}
 			break;
-			
+
 		case Win:
 			// TODO if (winAddr...)
 //			if (mTimeCnt > 1000) {
@@ -524,27 +527,27 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				mCombatState = CombatState.Exit;
 			}
 			break;
-			
+
 		case Loss:
 			// TODO if (lossAddr...)
 			if (sIsRandomFight && mFlyPeach.update(delta)) {
-				
+
 			} else {
 				mIsWin = false;
 				mCombatState = CombatState.Exit;
 			}
 			break;
-			
+
 		case Exit:
 			exitCurrentCombat();
 			break;
 		}
 	}
-	
+
 	@Override
 	public void draw(Canvas canvas) {
 		canvas.drawBitmap(mBackground, 0, 0, null);
-		
+
 		// draw the monsters and players
 		for (int i = 0; i < mMonsterList.size(); i++) {
 			FightingCharacter fc = mMonsterList.get(i);
@@ -552,12 +555,12 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				fc.getFightingSprite().draw(canvas);
 			}
 		}
-		
+
 		for (int i = mPlayerList.size() - 1; i >= 0; i--) {
 			FightingSprite f = mPlayerList.get(i).getFightingSprite();
 			f.draw(canvas);
 		}
-		
+
 		if (mCombatState == CombatState.SelectAction && !mIsAutoAttack) {
 			mCombatUI.draw(canvas);
 		} else if (mCombatState == CombatState.PerformAction) {
@@ -591,32 +594,32 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		} else if (mCombatState == CombatState.Win) {
 			mCombatSuccess.onKeyUp(key);
 		}
-		
+
 		if (mIsAutoAttack && key == Global.KEY_CANCEL) { // 退出“围攻”模式
 			mIsAutoAttack = false;
 		}
 	}
-	
+
 	private void generateAutoActionQueue() {
 		Monster monster = getFirstAliveMonster();
-		
+
 		mActionQueue.clear();
-		
+
 		// 玩家的Action
 		for (Player p : mPlayerList) {
 			if (p.isAlive()) {
-				mActionQueue.add(p.hasAtbuff(Player.BUFF_MASK_ALL) ? 
+				mActionQueue.add(p.hasAtbuff(Player.BUFF_MASK_ALL) ?
 						new ActionPhysicalAttackAll(p, mMonsterList) :
 						new ActionPhysicalAttackOne(p, monster));
 			}
 		}
-		
+
 		// 怪物的Action
 		generateMonstersActions();
-		
+
 		sortActionQueue();
 	}
-	
+
 	private void generateMonstersActions() {
 		// TODO according to the monster's intelligence, add some magic attack
 		for (Monster m : mMonsterList) {
@@ -630,22 +633,22 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			}
 		}
 	}
-	
+
 	private static Comparator<Action> sComparator = new Comparator<Action>() {
 
 		@Override
 		public int compare(Action lhs, Action rhs) {
 			return rhs.getPriority() - lhs.getPriority();
 		}
-		
-		
+
+
 	};
-	
+
 	/** 按敏捷从大到小排列*/
 	private void sortActionQueue() {
 		Collections.sort(mActionQueue, sComparator);
 	}
-	
+
 	/** 是否有玩家角色存活*/
 	private boolean isAnyPlayerAlive() {
 		for (Player p : mPlayerList) {
@@ -653,15 +656,15 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/** 怪物是否都挂了*/
 	private boolean isAllMonsterDead() {
 		return getFirstAliveMonster() == null;
 	}
-	
+
 	/** index 之后的主角是否都挂*/
 	private boolean isPlayerBehindDead(int index) {
 		for (int i = index + 1; i < mPlayerList.size(); i++) {
@@ -671,7 +674,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * 获取下一个存活的主角序号
 	 * @return 没有就返回-1
@@ -684,7 +687,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		}
 		return -1;
 	}
-	
+
 	private int getPreAlivePlayerIndex() {
 		for (int i = mCurSelActionPlayerIndex - 1; i >= 0; i--) {
 			if (mPlayerList.get(i).isAlive()) {
@@ -693,7 +696,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		}
 		return -1;
 	}
-	
+
 	private int getFirstAlivePlayerIndex() {
 		for (int i = 0; i < mPlayerList.size(); i++) {
 			if (mPlayerList.get(i).isAlive()) {
@@ -702,9 +705,9 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		}
 		return -1;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return 第一个活着的怪物，<code>null</code>怪物都挂了
 	 */
 	public Monster getFirstAliveMonster() {
@@ -715,7 +718,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 随机获取一个或者的玩家角色
 	 * @return <code>null</code>全死了
@@ -727,9 +730,9 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				++cnt;
 			}
 		}
-		
+
 		if (cnt == 0) return null; // 全死了
-		
+
 		Player[] arr = new Player[cnt];
 		int i = 0;
 		for (Player p : mPlayerList) {
@@ -737,21 +740,21 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 				arr[i++] = p;
 			}
 		}
-		
+
 		return arr[sRandom.nextInt(cnt)];
 	}
-	
+
 	/** 更新双方状态*/
 	private void updateFighterState() {
-		// TODO decrease the buff's round count 
+		// TODO decrease the buff's round count
 	}
 
 	@Override
 	public void onActionSelected(Action action) {
 		mActionQueue.add(action);
-		
+
 		mCombatUI.reset(); // 重置战斗UI
-		
+
 		if (action instanceof ActionCoopMagic) { // 只保留合击
 			mActionQueue.clear();
 			mActionQueue.add(action);
@@ -769,7 +772,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			mCombatUI.setCurrentPlayerIndex(mCurSelActionPlayerIndex);
 		}
 	}
-	
+
 	@Override
 	public void onAutoAttack() {
 		// clear all the actions that has been selected, enter into auto fight mode
@@ -778,20 +781,20 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 		mIsAutoAttack = true;
 		mCombatState = CombatState.SelectAction;
 	}
-	
+
 	@Override
 	public void onFlee() {
 		// TODO add flee action to all the other actor
-		
+
 		mCombatUI.reset(); // 重置战斗UI
-		
+
 		for (int i = mCurSelActionPlayerIndex; i < mPlayerList.size(); i++) {
 			if (mPlayerList.get(i).isAlive() && sRandom.nextBoolean() && sIsRandomFight) { // 50% 逃走
 				mActionQueue.add(new ActionFlee(mPlayerList.get(i), true, new Runnable() {
-					
+
 					@Override
 					public void run() {
-						// 逃跑成功后执行 
+						// 逃跑成功后执行
 						mIsWin = true;
 						mCombatState = CombatState.Exit;
 					}
@@ -814,7 +817,7 @@ public class Combat extends BaseScreen implements CombatUI.CallBack {
 			mActionQueue.removeLast();
 			mCurSelActionPlayerIndex = i;
 			mCombatUI.setCurrentPlayerIndex(mCurSelActionPlayerIndex);
-			
+
 			mCombatUI.reset();
 		}
 	}

@@ -10,6 +10,7 @@ import hz.cdj.game.fmj.views.BaseScreen;
 import hz.cdj.game.fmj.views.ScreenAnimation;
 import hz.cdj.game.fmj.views.ScreenMenu;
 import hz.cdj.game.fmj.views.ScreenSaveLoadGame;
+import javafx.scene.input.KeyCode;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
@@ -24,30 +25,30 @@ public class GameView extends JFrame implements Runnable{
 
 	private static GameView instance;
 	private Stack<BaseScreen> mScreenStack;
-	
+
 	public Panel panel;
-	
-	
+
+
 	Canvas canvas;
-	
+
 	/**
 	 * 控制逻辑线程执行
 	 */
 	private  boolean mKeepRunning = true;
 
 	public GameView() {
-		
+
 		panel=new Panel();
 		this.add(panel);//绘制类
-		
+
 		addL();//键盘监听
-		
+
 		canvas=new Canvas();
 		instance = this;
 	}
-	
+
 	public static void main(String[] args) throws IOException {
-		
+
 		//游戏窗口
 		GameView gameView	=	new GameView();
 		gameView.setTitle("伏魔记--PC.java版");
@@ -57,17 +58,17 @@ public class GameView extends JFrame implements Runnable{
 		gameView.setVisible(true);
 		gameView.setResizable(false);
 		gameView.setAlwaysOnTop(true);
-				
+
 		//加载游戏
 		initRes();
 		gameView.mScreenStack = new Stack<BaseScreen>();
 		gameView.mScreenStack.push(new ScreenAnimation(247));
-		
+
 		gameView.mKeepRunning = true;
 		new Thread(gameView, "logic update").start();
-		
-		
-		
+
+
+
 		//gameView.mKeepRunning  = false;
 	}
 
@@ -77,40 +78,40 @@ public class GameView extends JFrame implements Runnable{
 		Util.init();
 		ScriptProcess.init();
     }
-	
-	
+
+
 
 	public static GameView getInstance() {
 		return instance;
 	}
-	
+
 	public void changeScreen(int screenCode) {
 		BaseScreen tmp = null;
 		switch (screenCode) {
 		case Global.SCREEN_DEV_LOGO:
 			tmp = new ScreenAnimation(247);
 			break;
-			
+
 		case Global.SCREEN_GAME_LOGO:
 			tmp = new ScreenAnimation(248);
 			break;
-			
+
 		case Global.SCREEN_MENU:
 			tmp = new ScreenMenu();
 			break;
-			
+
 		case Global.SCREEN_MAIN_GAME:
 			tmp = new ScreenMainGame();
 			break;
-			
+
 		case Global.SCREEN_GAME_FAIL:
 			tmp = new ScreenAnimation(249);
 			break;
-			
+
 		case Global.SCREEN_SAVE_GAME:
 			tmp = new ScreenSaveLoadGame(ScreenSaveLoadGame.Operate.SAVE);
 			break;
-			
+
 		case Global.SCREEN_LOAD_GAME:
 			tmp = new ScreenSaveLoadGame(ScreenSaveLoadGame.Operate.LOAD);
 			break;
@@ -125,11 +126,11 @@ public class GameView extends JFrame implements Runnable{
 	public void pushScreen(BaseScreen screen) {
 		mScreenStack.push(screen);
 	}
-	
+
 	public void popScreen() {
 		mScreenStack.pop();
 	}
-	
+
 	public BaseScreen getCurScreen() {
 		return mScreenStack.peek();
 	}
@@ -143,7 +144,7 @@ public class GameView extends JFrame implements Runnable{
  				curTime = System.currentTimeMillis();
  				mScreenStack.peek().update(curTime - lastTime);
  				lastTime = curTime;
-				
+
 				ListIterator<BaseScreen> iter = mScreenStack.listIterator(mScreenStack.size());
 				// 找到第一个全屏窗口
 				while (iter.hasPrevious()) {
@@ -152,10 +153,10 @@ public class GameView extends JFrame implements Runnable{
 						break;
 					}
 				}
-				
+
 				// 刷新
 				Canvas canvas =GameView.instance.canvas;
-				
+
 				if (canvas != null) {
 					while (iter.hasNext()) {
 						iter.next().draw(canvas);
@@ -173,32 +174,32 @@ public class GameView extends JFrame implements Runnable{
 	}
 
 	public void keyDown(int key) {
-		
-		
+
+
 		synchronized (mScreenStack) {
 			mScreenStack.peek().onKeyDown(key);
 		}
 	}
-	
+
 	public void keyUp(int key) {
 		synchronized (mScreenStack) {
 			mScreenStack.peek().onKeyUp(key);
 		}
 	}
-	
+
 	public void addL() {
 		this.addKeyListener(new KeyListener() {//键盘监听
-			
-			
-			
-			
-			
-			
+
+
+
+
+
+
 			@Override
 			public void keyTyped(KeyEvent e) {
 				//System.out.println("1"+e.getKeyChar());
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				int key = c(e.getKeyCode());
@@ -206,10 +207,10 @@ public class GameView extends JFrame implements Runnable{
 					mScreenStack.peek().onKeyUp(key);
 				}
 			}
-			
-			
-			
-			
+
+
+
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				int key = c(e.getKeyCode());
@@ -217,7 +218,7 @@ public class GameView extends JFrame implements Runnable{
 					mScreenStack.peek().onKeyDown(key);
 				}
 			}
-			
+
 			int c(int c){
 				int key = -1;
 				switch (c) {
@@ -229,6 +230,9 @@ public class GameView extends JFrame implements Runnable{
 					break;
 				case 87:
 					key = Global.KEY_UP;
+					break;
+				case KeyEvent.VK_R:
+					key = Global.KEY_REPLAY;
 					break;
 				case 83:
 					key = Global.KEY_DOWN;
@@ -250,9 +254,9 @@ public class GameView extends JFrame implements Runnable{
 			}
 		});
 	}
-	
-	
-	
-	
+
+
+
+
 
 }

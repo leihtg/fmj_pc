@@ -23,24 +23,24 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 
 public class ScreenMainGame extends BaseScreen {
-	
+
 	public static ScreenMainGame instance;
-	
+
 	public static List<Player> sPlayerList = new LinkedList<Player>();
 	public Player mPlayer;
 
 	private ResMap mMap;
 	private Point mMapScreenPos = new Point(); // 屏幕左上角对应地图的位置
-	
+
 	private ScriptProcess mScriptSys;
 	private ScriptExecutor mScriptExecutor;
-	
+
 	public ScreenMainGame() {
 		instance = this;
 
 		mScriptSys = ScriptProcess.getInstance();
 		mScriptSys.setScreenMainGame(this);
-		
+
 		if (SaveLoadGame.startNewGame) { // 开始新游戏
 			Combat.FightDisable();
 			ScriptResources.initGlobalVar();
@@ -74,32 +74,32 @@ public class ScreenMainGame extends BaseScreen {
 		}
 //		Player.sMoney = 999999;
 	}
-	
+
 	private String mSceneName = "";
-	
+
 	public void setSceneName(String name) {
 		mSceneName = name;
 		SaveLoadGame.SceneName = name;
 	}
-	
+
 	public String getSceneName() {
 		return mSceneName;
 	}
-	
+
 	/**
 	 * 当前是否在执行脚本
 	 */
 	private boolean mRunScript = true;
-	
+
 	public void exitScript() {
 		mRunScript = false;
 		ScriptExecutor.goonExecute = false;
 	}
-	
+
 	public void runScript() {
 		mRunScript = true;
 	}
-	
+
 	public void startChapter(int type, int index) {
 		System.out.println("ScreenMainGame.startChapter " + type + " " + index);
 		mScriptSys.loadScript(type, index);
@@ -143,18 +143,18 @@ public class ScreenMainGame extends BaseScreen {
 			drawScene(canvas);
 		}
 	}
-	
+
 	public void drawScene(Canvas canvas) {
 		if (mMap != null) {
 			mMap.drawMap(canvas, mMapScreenPos.x, mMapScreenPos.y);
 		}
-		
+
 		int playY = 10000;
 		boolean hasPlayerBeenDrawn = false;
 		if (mPlayer != null) {
 			playY = mPlayer.getPosInMap().y;
 		}
-		
+
 		NPC[] npcs = getSortedNpcObjs();
 		for (int i = npcs.length - 1; i >= 0; --i) {
 			if (!hasPlayerBeenDrawn && playY < npcs[i].getPosInMap().y) {
@@ -168,7 +168,7 @@ public class ScreenMainGame extends BaseScreen {
 		}
 		Util.drawSideFrame(canvas);
 	}
-	
+
 	/**
 	 * 按y值从大到小排序，确保正确的遮挡关系
 	 * @return
@@ -181,11 +181,11 @@ public class ScreenMainGame extends BaseScreen {
 				arr[i++] = mNPCObj[j];
 			}
 		}
-		
+
 		NPC[] arr2 = new NPC[i];
 		System.arraycopy(arr, 0, arr2, 0, i);
 		arr = arr2;
-		
+
 		// 选择排序
 		for (int j = 0; j < i; j++) {
 			int max = j;
@@ -210,21 +210,23 @@ public class ScreenMainGame extends BaseScreen {
 			return;
 		} else if (mPlayer != null) {
 			switch (key) {
-			case Global.KEY_LEFT:
-				walkLeft();
-				break;
-			case Global.KEY_RIGHT:
-				walkRight();
-				break;
-			case Global.KEY_UP:
-				walkUp();
-				break;
-			case Global.KEY_DOWN:
-				walkDown();
-				break;
-			case Global.KEY_ENTER:
-				triggerSceneObjEvent();
-				break;
+				case Global.KEY_LEFT:
+					walkLeft();
+					break;
+				case Global.KEY_RIGHT:
+					walkRight();
+					break;
+				case Global.KEY_UP:
+					walkUp();
+					break;
+				case Global.KEY_DOWN:
+					walkDown();
+					break;
+				case Global.KEY_ENTER:
+					triggerSceneObjEvent();
+					break;
+				case Global.KEY_REPLAY:
+					break;
 			}
 		}
 	}
@@ -240,18 +242,18 @@ public class ScreenMainGame extends BaseScreen {
 			GameView.getInstance().pushScreen(new ScreenGameMainMenu());
 		}
 	}
-	
+
 	public void gotoAddress(int address) {
 		mScriptExecutor.gotoAddress(address);
 		mRunScript = true;
 	}
-	
+
 	public void triggerEvent(int eventId) {
 		if (mScriptExecutor != null) {
 			mRunScript = mScriptExecutor.triggerEvent(eventId);
 		}
 	}
-	
+
 	/**
 	 * 按enter键后，检测并触发场景对象里的事件，如NPC对话，开宝箱等
 	 */
@@ -265,7 +267,7 @@ public class ScreenMainGame extends BaseScreen {
 		case South: ++y;	break;
 		case West:	--x;	break;
 		}
-		
+
 		// NPC事件
 		int npcId = getNpcIdFromPosInMap(x, y);
 		if (npcId != 0) {
@@ -274,7 +276,7 @@ public class ScreenMainGame extends BaseScreen {
 		} else if (triggerMapEvent(x, y)) {// 地图切换
 		}
 	}
-	
+
 	/**
 	 * 场景切换
 	 * 如果地图(x,y)有地图事件，就触发该事件
@@ -294,7 +296,7 @@ public class ScreenMainGame extends BaseScreen {
 		Combat.StartNewRandomCombat();
 		return false;
 	}
-	
+
 	/**
 	 * 地图的(x,y)处，是否可行走，是否有NPC
 	 * @param x
@@ -305,7 +307,7 @@ public class ScreenMainGame extends BaseScreen {
 		if (mMap == null) return false;
 		return mMap.canPlayerWalk(x, y) && getNpcFromPosInMap(x, y) == null;
 	}
-	
+
 	public void walkLeft() {
 		Point p = mPlayer.getPosInMap();
 		triggerMapEvent(p.x - 1, p.y);
@@ -317,7 +319,7 @@ public class ScreenMainGame extends BaseScreen {
 			mPlayer.walkStay(Direction.West);
 		}
 	}
-	
+
 	public void walkUp() {
 		Point p = mPlayer.getPosInMap();
 		triggerMapEvent(p.x, p.y - 1);
@@ -329,7 +331,7 @@ public class ScreenMainGame extends BaseScreen {
 			mPlayer.walkStay(Direction.North);
 		}
 	}
-	
+
 	public void walkRight() {
 		Point p = mPlayer.getPosInMap();
 		triggerMapEvent(p.x + 1, p.y);
@@ -341,7 +343,7 @@ public class ScreenMainGame extends BaseScreen {
 			mPlayer.walkStay(Direction.East);
 		}
 	}
-	
+
 	public void walkDown() {
 		Point p = mPlayer.getPosInMap();
 		triggerMapEvent(p.x, p.y + 1);
@@ -353,7 +355,7 @@ public class ScreenMainGame extends BaseScreen {
 			mPlayer.walkStay(Direction.South);
 		}
 	}
-	
+
 	/**
 	 * 载入号码n,类型m的地图，初始位置（x，y）
 	 */
@@ -362,27 +364,27 @@ public class ScreenMainGame extends BaseScreen {
 		if (mPlayer != null && mMap != null) {
 			tmpP = mPlayer.getPosOnScreen(mMapScreenPos);
 		}
-		
+
 		mMap = (ResMap)DatLib.getInstance().getRes(DatLib.RES_MAP, type, index);
 		mMapScreenPos.set(x, y);
 		if (tmpP != null) {
 			mPlayer.setPosOnScreen(tmpP.x, tmpP.y, mMapScreenPos);
 		}
-		
+
 		SaveLoadGame.MapType = type;
 		SaveLoadGame.MapIndex = index;
 		SaveLoadGame.MapScreenX = x;
 		SaveLoadGame.MapScreenY = y;
 	}
-	
+
 	public ResMap getCurrentMap() {
 		return mMap;
 	}
-	
+
 	public void setMapScreenPos(int x, int y) {
 		mMapScreenPos.set(x, y);
 	}
-	
+
 	/**
 	 * 创建主角号码actor，位置为（x，y）
 	 * @param actorId
@@ -395,7 +397,7 @@ public class ScreenMainGame extends BaseScreen {
 		sPlayerList.add(mPlayer);
 		mPlayer = sPlayerList.get(0);
 	}
-	
+
 	public void deleteActor(int actorId) {
 		for (int i = 0; i < sPlayerList.size(); i++) {
 			if (sPlayerList.get(i).getIndex() == actorId) {
@@ -403,18 +405,18 @@ public class ScreenMainGame extends BaseScreen {
 				break;
 			}
 		}
-		
+
 		if (sPlayerList.size() > 0) {
 			mPlayer = sPlayerList.get(0);
 		} else {
 			mPlayer = null;
 		}
 	}
-	
+
 	public Player getPlayer() {
 		return mPlayer;
 	}
-	
+
 	public Player getPlayer(int actorId) {
 		for (int i = 0; i < sPlayerList.size(); i++) {
 			Player p = sPlayerList.get(i);
@@ -424,18 +426,18 @@ public class ScreenMainGame extends BaseScreen {
 		}
 		return null;
 	}
-	
+
 	public List<Player> getPlayerList() {
 		return sPlayerList;
 	}
-	
+
 	/**
 	 * id--NPC或场景对象 (1-40)
 	 */
 	private NPC[] mNPCObj = new NPC[41];
-	
+
 	private NPC.ICanWalk mCanWalk = new NPC.ICanWalk() {
-		
+
 		@Override
 		public boolean canWalk(int x, int y) {
 			return mMap.canWalk(x, y) &&
@@ -443,7 +445,7 @@ public class ScreenMainGame extends BaseScreen {
 					!mPlayer.getPosInMap().equals(x, y);
 		}
 	};
-	
+
 	/**
 	 * 创建配角号码npc，位置为（x，y），id为操作号
 	 * @param id
@@ -457,31 +459,31 @@ public class ScreenMainGame extends BaseScreen {
 		npcobj.setICanWalk(mCanWalk);
 		mNPCObj[id] = npcobj;
 	}
-	
+
 	public void deleteNpc(int id) {
 		mNPCObj[id] = null;
 	}
-	
+
 	public void deleteAllNpc() {
 		for (int i = 0; i <= 40; i++) {
 			mNPCObj[i] = null;
 		}
 	}
-	
+
 	public NPC getNPC(int id) {
 		return mNPCObj[id];
 	}
-	
+
 	public boolean isNpcVisible(NPC npc) {
 		Point p = npc.getPosOnScreen(mMapScreenPos);
 		return p.x >= 0 && p.x < ResMap.WIDTH &&
 				p.y >= 0 && p.y <= ResMap.HEIGHT;
 	}
-	
+
 	public boolean isNpcVisible(int id) {
 		return isNpcVisible(getNPC(id));
 	}
-	
+
 	/**
 	 * 得到地图的(x,y)处的NPC，没有就返回null
 	 * @param x
@@ -491,7 +493,7 @@ public class ScreenMainGame extends BaseScreen {
 	public NPC getNpcFromPosInMap(int x, int y) {
 		return mNPCObj[getNpcIdFromPosInMap(x, y)];
 	}
-	
+
 	public int getNpcIdFromPosInMap(int x, int y) {
 		for (int i = 1; i <= 40; i++) {
 			if (mNPCObj[i] != null && mNPCObj[i].getPosInMap().equals(x, y)) {
@@ -500,7 +502,7 @@ public class ScreenMainGame extends BaseScreen {
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * 建一个宝箱，宝箱号码boxindex(角色图片，type为4)，
 	 * 位置为（x，y），id为操作号（与NPC共用)
@@ -510,7 +512,7 @@ public class ScreenMainGame extends BaseScreen {
 		box.setPosInMap(x, y);
 		mNPCObj[id] = box;
 	}
-	
+
 	public void deleteBox(int id) {
 		mNPCObj[id] = null;
 	}

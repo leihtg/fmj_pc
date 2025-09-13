@@ -23,15 +23,16 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 
 	private int ox, oy;
 
-	GoodsHiddenWeapon hiddenWeapon;
+	BaseGoods weapon;
 
 	/** 伤害生命值 */
 	int affectHp;
 
 	public ActionThrowItemOne(FightingCharacter attacker, FightingCharacter target, BaseGoods g) {
 		super(attacker, target);
+		this.weapon = g;
 		if (g instanceof GoodsHiddenWeapon) {
-			hiddenWeapon = (GoodsHiddenWeapon) g;
+			GoodsHiddenWeapon hiddenWeapon = (GoodsHiddenWeapon) g;
 			affectHp = hiddenWeapon.getAffectHp();
 			mAni = hiddenWeapon.getAni();
 			if (mAni != null) {
@@ -52,6 +53,8 @@ public class ActionThrowItemOne extends ActionSingleTarget {
 
 		// TODO effect it
 		mTarget.setHP(mTarget.getHP() - affectHp);
+		// 使用掉
+		Player.sGoodsList.deleteGoods(weapon);
 
 		mAniX = mTarget.getCombatX();
 		mAniY = mTarget.getCombatY();

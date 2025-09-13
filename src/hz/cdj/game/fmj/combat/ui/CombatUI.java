@@ -638,27 +638,23 @@ public class CombatUI extends BaseScreen {
 
 				case 1:// 投掷
 					GameView.getInstance().pushScreen(new ScreenGoodsList(getThrowableGoodsList(),
-							new ScreenGoodsList.OnItemSelectedListener() {
+							goods -> {
+								GameView.getInstance().popScreen(); // pop goods list
+								CombatUI.this.mScreenStack.pop(); // pop misc menu
+								if (goods.effectAll()) {
+									// 投掷伤害全体敌人
+									onActionSelected(new ActionThrowItemAll(mPlayerList.get(mCurPlayerIndex), mMonsterList, (GoodsHiddenWeapon) goods));
+								} else { // 选一个敌人
+									CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mMonsterIndicator, sMonsterIndicatorPos, mMonsterList,
+											new OnCharacterSelectedListener() {
 
-								@Override
-								public void onItemSelected(final BaseGoods goods) {
-									GameView.getInstance().popScreen(); // pop goods list
-									CombatUI.this.mScreenStack.pop(); // pop misc menu
-									if (goods.effectAll()) {
-										// 投掷伤害全体敌人
-										onActionSelected(new ActionThrowItemAll(mPlayerList.get(mCurPlayerIndex), mMonsterList, (GoodsHiddenWeapon)goods));
-									} else { // 选一个敌人
-										CombatUI.this.mScreenStack.push(new MenuCharacterSelect(mMonsterIndicator, sMonsterIndicatorPos, mMonsterList,
-												new OnCharacterSelectedListener() {
-
-													@Override
-													public void onCharacterSelected(FightingCharacter fc) {
-														// add throw action
-														onActionSelected(new ActionThrowItemOne(mPlayerList.get(mCurPlayerIndex),
-																fc, goods));
-													}
-												}, true));
-									}
+												@Override
+												public void onCharacterSelected(FightingCharacter fc) {
+													// add throw action
+													onActionSelected(new ActionThrowItemOne(mPlayerList.get(mCurPlayerIndex),
+															fc, goods));
+												}
+											}, true));
 								}
 							}, Mode.Use));
 					break;

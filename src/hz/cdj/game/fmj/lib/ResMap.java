@@ -71,7 +71,7 @@ public class ResMap extends ResBase {
 		mData = new byte[len];
 		System.arraycopy(buf, offset + 0x12, mData, 0, len);
 	}
-	
+
 	/**
 	 * 判断地图(x,y)是否可行走
 	 * @param x
@@ -82,27 +82,27 @@ public class ResMap extends ResBase {
 		if (x < 0 || x >= mWidth || y < 0 || y >= mHeight) {
 			return false;
 		}
-		
+
 		int i = y * mWidth + x;
 		return (mData[i * 2] & 0x80) != 0;
 	}
-	
+
 	public boolean canPlayerWalk(int x, int y) {
 		return canWalk(x, y) && (x >= 4) && (x < mWidth - 4)
 				&& (y >= 3) && (y < mHeight - 2);
 	}
-	
+
 	public int getEventNum(int x, int y) {
 		if (x < 0 || x >= mWidth || y < 0 || y >= mHeight) {
 			return -1;
 		}
-		
+
 		int i = y * mWidth + x;
 		return (int)mData[i * 2 + 1] & 0xFF;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param x
 	 *            图块的x坐标
 	 * @param y
@@ -117,7 +117,7 @@ public class ResMap extends ResBase {
 	/**
 	 * 水平方向 left --- left+WIDTH <br>
 	 * 竖直方向 top --- top + HEIGHT
-	 * 
+	 *
 	 * @param canvas
 	 * @param left
 	 *            地图的最左边
@@ -133,12 +133,21 @@ public class ResMap extends ResBase {
 		int minX = Math.min(WIDTH, mWidth - left);
 		for (int y = 0; y < minY; y++) {
 			for (int x = 0; x < minX; x++) {
-				mTiles.draw(canvas, x * Tiles.WIDTH + Global.MAP_LEFT_OFFSET,
-						y * Tiles.HEIGHT, getTileIndex(left + x, top + y));
+				int sx = x * Tiles.WIDTH + Global.MAP_LEFT_OFFSET;
+				int sy = y * Tiles.HEIGHT;
+				mTiles.draw(canvas, sx, sy, getTileIndex(left + x, top + y));
+
+				int event = getEventNum(left + x, top + y);
+				if (event > 0) {
+					int color = Global.COLOR_WHITE;
+					Global.COLOR_WHITE = 0xFFFF0000;
+					TextRender.drawText(canvas, "" + event, sx, sy);
+					Global.COLOR_WHITE = color;
+				}
 			}
 		}
 	}
-	
+
 	public void drawWholeMap(Canvas canvas, int x, int y) {
 		if (mTiles == null) {
 			mTiles = new Tiles(mTilIndex);
@@ -159,15 +168,15 @@ public class ResMap extends ResBase {
 			}
 		}
 	}
-	
+
 	public int getMapWidth() {
 		return mWidth;
 	}
-	
+
 	public int getMapHeight() {
 		return mHeight;
 	}
-	
+
 	public String getMapName() {
 		return mName;
 	}
